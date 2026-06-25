@@ -1,10 +1,6 @@
 const pool = require("../config/db");
 
-async function createMessage(
-    sessionId,
-    role,
-    content,
-    citations = null
+async function createMessage(sessionId, role, content, citations = null
 ) {
     const result = await pool.query(
         `INSERT INTO messages
