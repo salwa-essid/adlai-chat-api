@@ -17,3 +17,5 @@ CREATE TABLE messages (
     citations JSONB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
