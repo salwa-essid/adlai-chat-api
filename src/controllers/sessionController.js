@@ -5,6 +5,17 @@ async function createSession(req, res) {
     try {
         console.log("BODY =", req.body);
         const { user_id,title } = req.body;
+        if(!user_id|| !title){
+            return res.status(400).json({error: "user_id or title are required"});
+        }
+        if (
+            typeof user_id !== "string" || typeof title !== "string"
+        ) {
+            return res.status(400).json({
+                error: "user_id and title must be strings"
+            });
+        }
+
         const session = await sessionModel.createSession(
             user_id,
             title
