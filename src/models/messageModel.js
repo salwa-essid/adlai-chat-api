@@ -2,7 +2,6 @@ const pool = require("../config/db");
 
 async function createMessage(sessionId, role, content, citations = null
 ) {
-    console.log("citations =", citations);
     const result = await pool.query(
         `INSERT INTO messages
         (session_id, role, content, citations)
@@ -10,10 +9,8 @@ async function createMessage(sessionId, role, content, citations = null
         RETURNING *`,
         [sessionId, role, content,  citations ? JSON.stringify(citations) : null]
     );
-
     return result.rows[0];
 }
-
 async function getMessagesBySession(sessionId) {
     const result = await pool.query(
         `SELECT *

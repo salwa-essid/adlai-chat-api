@@ -3,7 +3,6 @@ const messageModel = require("../models/messageModel");
 async function createMessage(req, res) {
     try {
         const { id } = req.params;
-        console.log('body',req.body)
         const { role, content, citations } = req.body;
         if (!role || !content) {
             return res.status(400).json({

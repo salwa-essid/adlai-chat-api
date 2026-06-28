@@ -3,7 +3,6 @@ const messageModel = require("../models/messageModel");
 
 async function createSession(req, res) {
     try {
-        console.log("BODY =", req.body);
         const { user_id,title } = req.body;
         if(!user_id|| !title){
             return res.status(400).json({error: "user_id or title are required"});
@@ -30,43 +29,72 @@ async function createSession(req, res) {
 async function getSessions(req, res) {
     try {
         const { user_id } = req.query;
+        if (!user_id) {
+            return res.status(400).json({
+                error: "user_id is required"
+            });
+        }
         const sessions = await sessionModel.getSessionsByUser(user_id);
-        res.json(sessions);
+        return res.json(sessions);
+
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             error: error.message
         });
     }
 }
-
 async function getSession(req, res) {
     try {
         const { id } = req.params;
         const session = await sessionModel.getSessionById(id);
         if (!session) {
-            return res.status(404).json({error: "Session not found"});
+            return res.status(404).json({
+                error: "Session not found"
+            });
         }
         const messages = await messageModel.getMessagesBySession(id);
-        res.json({...session, messages});
+        res.json({
+            ...session,
+            messages
+        });
 
     } catch (error) {
+        if (error.code === "22P02") {
+            return res.status(400).json({
+                error: "Invalid session ID format"
+            });
+        }
+
+        console.error("getSession error:", error.message);
+
         res.status(500).json({
-            error: error.message
+            error: "Failed to retrieve session"
         });
     }
 }
-
 async function deleteSession(req, res) {
     try {
         const { id } = req.params;
-        await sessionModel.deleteSession(id);
-        res.status(204).send();
-    } catch (error) {
-        res.status(500).json({
-            error: error.message
+        const deleted = await sessionModel.deleteSession(id);
+        if (!deleted) {
+            return res.status(404).json({
+                error: "Session not found."
+            });
+        }
+        return res.sendStatus(204);
+    } catch (err) {
+        if (err.code === "22P02") {
+            return res.status(400).json({
+                error: "Invalid session ID format."
+            });
+        }
+        console.error("deleteSession error:", err.message);
+        return res.status(500).json({
+            error: "Failed to delete session."
         });
     }
 }
+
 
 module.exports = {
     createSession,

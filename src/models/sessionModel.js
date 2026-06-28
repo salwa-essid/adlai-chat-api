@@ -30,10 +30,10 @@ async function getSessionsByUser(userId) {
 }
 
 async function deleteSession(id) {
-    await pool.query(
-        "DELETE FROM sessions WHERE id = $1",
-        [id]
+    const result = await pool.query(
+        "DELETE FROM sessions WHERE id = $1", [id]
     );
+    return result.rowCount > 0; // true = found & deleted, false = not found
 }
 
 module.exports = {
