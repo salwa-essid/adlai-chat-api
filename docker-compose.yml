@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       adlai
+      POSTGRES_USER:     adlai_user
+      POSTGRES_PASSWORD: adlai_pass
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U adlai_user -d adlai']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST:     postgres
+      DB_PORT:     5432
+      DB_NAME:     adlai
+      DB_USER:     adlai_user
+      DB_PASSWORD: adlai_pass
+      PORT:        3000
+      NODE_ENV:    production
+    ports:
+      - '3000:3000'
+    command: sh -c "node src/migrations/run.js && node server.js"
+
+volumes:
+  pgdata:
